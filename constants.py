@@ -1,9 +1,11 @@
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 ### USED IN functions.py ###
 
 GROUP_SIZE = 2  # EDIT THIS
-PASSWORD = 'halimahandherdeers'  # FILL THIS UP
+PASSWORD = os.environ.get('PASSWORD')
 
 ANGEL = "🕊ANGEL🕊"
 MORTAL = "🐵MORTAL🐵"

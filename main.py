@@ -5,12 +5,14 @@ from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 from functions import *
 
-import requests
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 angel_bot = telepot.Bot(
-    '2043620030:AAGuHQQuWoejoeZy1MoRW6RUx9p_a4w7pdI')  # TOKEN HERE
+    os.environ.get('ANGEL_BOT_TOKEN'))  # TOKEN HERE
 mortal_bot = telepot.Bot(
-    '1922226969:AAHDdp0oQFpHRgg-QHAlS7XYN3pw7xBhncg')
+    os.environ.get('MORTAL_BOT_TOKEN'))
 
 
 def on_chat(msg, bot, receiver_bot, receiver):
