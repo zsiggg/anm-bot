@@ -22,26 +22,27 @@ class Player():
     def update_username(self, username):
         self.username = username
 
-# writes groups into a pickle; called before the program terminates
+
+# FOR TESTING
+groups = np.array([[Player('Zsigmond', 'zsiggg', 'M', 'test', 'N', "259329943"), Player(
+    'Zsigmond', 'zsiggg', 'M', 'test gift', 'N', "259329943"), ], ])
+
+# FOR REAL USE
+# with open('players.pickle', 'rb') as f:
+#     groups = pickle.load(f)
+
+with open('game_started.txt', 'r') as f:
+    game_started = int(f.read())
+# game_started = False
 
 
-def update_players_database():
+def update_players_database():      # writes groups into a pickle; called before the program terminates
     global groups
     with open('players.pickle', 'wb') as f:
         pickle.dump(groups, f)
 
 
-# with open('players.pickle', 'rb') as f:
-#     groups = pickle.load(f)
-
-
-groups = np.array([[Player('Zsigmond', 'zsiggg', 'M', 'test', 'N', "259329943"), Player(
-    'Zsigmond', 'zsiggg', 'M', 'test gift', 'N', "259329943"), ], ])
-
-# sends a custom message all players
-
-
-def announce(bot, chat_id, msg, message_text):
+def announce(bot, chat_id, msg, message_text):      # sends a custom message all players
     message_text_split = message_text.split(maxsplit=1)
     if PASSWORD != message_text_split[0]:
         return 'Unauthorized.'
@@ -51,9 +52,8 @@ def announce(bot, chat_id, msg, message_text):
                 player.chat_id, f'Hi {player.name}, House Comm has made a new ANNOUNCEMENT, see below:\n\n{message_text_split[1]}')
     return 'Your announcement has been broadcasted to everyone!'
 
+
 # sends a message to all players revealing their own group numbers
-
-
 def reveal(bot, chat_id, msg, message_text):
     if PASSWORD not in message_text:
         return 'Unauthorized.'
@@ -77,9 +77,6 @@ def check_registration(bot, chat_id, msg, message_text):
     return f'All {groups.size} people has registered with the bot. Safe to start game.'
 
 
-GROUP_SIZE = 2  # EDIT THIS
-
-
 def reload_players_data(bot, chat_id, msg, message_text):
     global groups
     if PASSWORD not in message_text:
@@ -93,12 +90,6 @@ def reload_players_data(bot, chat_id, msg, message_text):
     groups = np.array(groups)
     update_players_database()
     return f'Players data successfully reloaded! {len(groups)} groups of {GROUP_SIZE} found.'
-
-
-with open('game_started.txt', 'r') as f:
-    game_started = int(f.read())
-
-# game_started = False
 
 
 ############################### SECTION: SEND TO PEOPLE ###############################
@@ -137,45 +128,6 @@ def send_to(person):
             return f'This content type ({content_type}) is not supported!'
     return send_to_person
 
-
-# def send_sticker_to_angel(bot, msg):
-#     global game_started
-#     if not game_started:
-#         return GAME_NOT_STARTED
-#     try:
-#         angel_data = get_angel_of(msg['reply_to_message']['from']['username'])
-#     except IndexError:
-#         print(
-#             f'Invalid username {msg["reply_to_message"]["from"]["username"]}')
-#         return build_unauthorised_player_message(msg['reply_to_message']['from']['username'])
-#     bot.sendMessage(angel_data.chat_id,
-#                     f'✍️ Hi {angel_data.name}, your 🐵MORTAL🐵 sent you the following sticker:')
-#     bot.sendSticker(angel_data.chat_id,
-#                     msg['reply_to_message']['sticker']['file_id'])
-#     bot.sendMessage(angel_data.chat_id,
-#                     'Type /m or /mortal, followed by your message, to reply.\nExample: "/m hi!"')
-#     return f'Your sticker has been sent to your {ANGEL}! #angel'
-
-
-# def send_sticker_to_mortal(bot, msg):
-#     global game_started
-#     if not game_started:
-#         return GAME_NOT_STARTED
-#     try:
-#         mortal_data = get_mortal_of(
-#             msg['reply_to_message']['from']['username'])
-#     except IndexError:
-#         print(
-#             f'Invalid username {msg["reply_to_message"]["from"]["username"]}')
-#         return build_unauthorised_player_message(msg['reply_to_message']['from']['username'])
-#     bot.sendMessage(mortal_data.chat_id,
-#                     f'✍️ Hi {mortal_data.name}, your 🕊ANGEL🕊 sent you the following sticker:')
-#     bot.sendSticker(mortal_data.chat_id,
-#                     msg['reply_to_message']['sticker']['file_id'])
-#     bot.sendMessage(mortal_data.chat_id,
-#                     'Type /a or /angel, followed by your message, to reply.\nExample: "/a hi!"')
-#     return f'Your sticker has been sent to your {MORTAL}! #mortal'
-
 ############################### END SECTION: SEND TO PEOPLE ###############################
 
 
@@ -208,7 +160,7 @@ def start_game(bot, chat_id, msg, message_text):
         f.write('1')
 
 
-def register(bot, chat_id, msg, message_text):
+def register(bot, chat_id, msg, message_text):      # to be understood
     try:
         player_data = groups[list(zip(
             *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
@@ -218,7 +170,7 @@ def register(bot, chat_id, msg, message_text):
         return PLAYER_NOT_FOUND
 
 
-def verify(bot, chat_id, msg, message_text):
+def verify(bot, chat_id, msg, message_text):        # to be understood
     player_data = groups[list(zip(
         *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
     player_data.update_chat_id(chat_id)
@@ -229,7 +181,7 @@ def verify(bot, chat_id, msg, message_text):
     return (build_verification_message(player_data.name))
 
 
-def update_username(bot, chat_id, msg, message_text):
+def update_username(bot, chat_id, msg, message_text):       # to be understood
     player_data = groups[list(
         zip(*np.where(np.vectorize(lambda x: x.chat_id)(groups) == chat_id)))[0]]
     # print(player_data.chat_id)

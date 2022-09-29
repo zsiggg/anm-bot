@@ -2,6 +2,7 @@
 
 ### USED IN functions.py ###
 
+GROUP_SIZE = 2  # EDIT THIS
 PASSWORD = 'halimahandherdeers'  # FILL THIS UP
 
 ANGEL = "🕊ANGEL🕊"
