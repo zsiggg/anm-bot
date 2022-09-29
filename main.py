@@ -15,11 +15,9 @@ mortal_bot = telepot.Bot(
 
 def on_chat(msg, bot, receiver_bot, receiver):
     content_type, chat_type, chat_id = telepot.glance(msg)
-    print("CHAT_ID", chat_id)
     # now = time.strftime('%A, %Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     now = strftime('%Y-%m-%d %H:%M:%S', localtime(time()))
     # now = ctime(time())
-
     if content_type == 'text':
         message = msg['text']
         print(f'{now} | Received a message from {msg["from"]["username"]}')
@@ -48,22 +46,27 @@ def on_chat(msg, bot, receiver_bot, receiver):
                                 reply_to_message_id=msg['message_id'])
         else:                       # message is just plain text to be sent to the other bot
             response = send_to(receiver)(
-                receiver_bot, chat_id, msg, message, content_type)
+                receiver_bot, bot, chat_id, msg, message, content_type)
             print(response)
-    elif content_type == 'photo':
-        message = msg.get('caption', "")
-        print(f'{now} | Received a photo from {msg["from"]["username"]}')
-        response = send_to(receiver)(
-            receiver_bot, chat_id, msg, message, content_type)
-        print(response)
-    elif content_type == 'sticker':
-        print(f'{now} | Received a sticker from {msg["from"]["username"]}')
-        response = send_to(receiver)(
-            receiver_bot, chat_id, msg, "", content_type)
-        print(response)
     else:
-        bot.sendMessage(chat_id, build_invalid_content_type_message(
-            content_type), reply_to_message_id=msg['message_id'])
+        message = msg.get('caption', "")
+        response = send_to(receiver)(
+            receiver_bot, bot, chat_id, msg, message, content_type)
+        print(response)
+    # elif content_type == 'photo':
+    #     message = msg.get('caption', "")
+    #     print(f'{now} | Received a photo from {msg["from"]["username"]}')
+    #     response = send_to(receiver)(
+    #         receiver_bot, bot, chat_id, msg, message, content_type)
+    #     print(response)
+    # elif content_type in ['sticker', 'video_note']:     # no caption content_type
+    #     print(f'{now} | Received a sticker from {msg["from"]["username"]}')
+    #     response = send_to(receiver)(
+    #         receiver_bot, bot, chat_id, msg, "", content_type)   # pass in empty message_text
+    #     print(response)
+    # else:
+    #     bot.sendMessage(chat_id, build_invalid_content_type_message(
+    #         content_type), reply_to_message_id=msg['message_id'])
 
 
 angel_bot.message_loop({'chat': lambda msg: on_chat(

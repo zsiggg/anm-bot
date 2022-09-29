@@ -103,7 +103,7 @@ def get_mortal_of(player_username):
 
 
 def send_to(person):
-    def send_to_person(bot, chat_id, msg, message_text, content_type):
+    def send_to_person(receiver_bot, sender_bot, chat_id, msg, message_text, content_type):
         global game_started
         if not game_started:
             return GAME_NOT_STARTED
@@ -113,19 +113,30 @@ def send_to(person):
         except IndexError:
             print(f'Invalid username {msg["from"]["username"]}')
             return build_unauthorised_player_message(msg['from']['username'])
-        if content_type == "photo":
-            bot.sendPhoto(person_data.chat_id,
-                          msg['photo'][0]['file_id'], caption=message_text)
-            return f'Photo sent to {person}, {person_data.name}'
-        elif content_type == "sticker":
-            bot.sendSticker(chat_id, msg['sticker']['file_id'])
-            return f'Sticker sent to {person}, {person_data.name}'
+        if content_type == "sticker":
+            receiver_bot.sendSticker(chat_id, msg['sticker']['file_id'])
         elif content_type == "text":
-            bot.sendMessage(person_data.chat_id, message_text)
-            return f'Message sent to {person}, {person_data.name}'
-            # return 'Please type /a or /m followed by your message (e.g. "/a hi!").'
-        else:
-            return f'This content type ({content_type}) is not supported!'
+            receiver_bot.sendMessage(person_data.chat_id, message_text)
+        # elif content_type == "photo":
+        #     bot.sendPhoto(person_data.chat_id,
+        #                   msg['photo'][0]['file_id'], caption=message_text)
+        # elif content_type == "audio":
+        #     bot.sendAudio(person_data.chat_id,
+        #                   msg['audio']['file_id'], caption=message_text)
+        # elif content_type == "video":
+        #     bot.sendVideo(person_data.chat_id,
+        #                   msg['video']['file_id'], caption=message_text)
+        # elif content_type == "voice":
+        #     bot.sendVoice(person_data.chat_id,
+        #                   msg['voice']['file_id'], caption=message_text)
+        # elif content_type == "video_note":
+        #     bot.sendVideoNote(person_data.chat_id,
+        #                       msg['video_note']['file_id'])
+        else:       # unsupported file type, send error message to sender
+            sender_bot.sendMessage(person_data.chat_id, build_invalid_content_type_message(
+                content_type), reply_to_message_id=msg['message_id'])
+            return f'Attempt to send unsupported content type ({content_type}) to {person}, {person_data.name}'
+        return f'{content_type} sent to {person}, {person_data.name}'
     return send_to_person
 
 ############################### END SECTION: SEND TO PEOPLE ###############################
