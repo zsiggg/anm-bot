@@ -22,27 +22,20 @@ A reminder that you’re 🚫NOT🚫 allowed to enter anybody’s room at all ti
 
 HAVE FUN AND STAY SAFE!!'''
 
-HELP_GUIDE = '''*Strix Angels and Mortals Bot Help Guide*
-To view your chat history, feel free to use the \\#angel or \\#mortal hashtags attached\\.
+HELP_GUIDE = '''*Rusa Angels and Mortals Bot Help Guide*
 
+Rusa Angel and Mortals are back for another year 💪💪 
+
+Now, there are separate bots to talk to your Angel and Mortal. Talk to your Angel 👼🏻 in the Angel bot, and your Mortal 👶🏻 in the Mortal bot!
+
+*Commands*
 `/help      `: brings up this page
-`/a, /angel `: sends a message anonymously to your angel,
-`/m, /mortal`: sends a message anonymously to your mortal,
 `/register  `: begins the registration process
 
-You can also send photos and stickers using this bot, in addition to text messages\\.
+You can also send stickers ✨ using this bot, in addition to text messages\\.
 
-*Command Syntax*
-`/help`
-`/a <message>`
-`/angel <message>`
-`/m <message>`
-`/mortal <message>`
-`/register`
-
-If the bot does not acknowledge your message, please give it some time as the server may be experiencing high traffic/demand\\. For tech support please contact house comm members\\.
-
-_Tip: On mobile, you can press and hold the commands \\(e\\.g\\. /a, /m\\) to start a new message beginning with that command\\._'''
+If the bot does not acknowledge your message, please give it some time as the server may be experiencing high traffic/demand 🙁\\. For tech support please contact house comm members\\.
+'''
 
 
 def build_unauthorised_player_message(player_name):
