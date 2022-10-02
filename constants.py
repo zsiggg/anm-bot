@@ -44,7 +44,7 @@ START_GAME_MESSAGE_ANGEL_BOT = 'Your chat with your angel has started! Say hi ðŸ
 
 
 def build_unauthorised_player_message(player_name):
-    return f'ERROR: Unauthorised player!\n\nI\'m sorry, I don\'t recognise you. Did you change your username? If you did, please send "/update <new_username>" here first. Replace <new_username> with your current username (e.g. "/update {player_name}").\n\nIf you did not change your username but are still getting this error, please contact tech support!'
+    return f'ERROR: Unauthorised player!\n\nI\'m sorry, I don\'t recognise you.\n\nIf you are getting this error even though you have registered for the event, please contact tech support!'
 
 
 def build_message(type, player_name, content, person):

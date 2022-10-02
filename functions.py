@@ -108,15 +108,21 @@ def get_mortal_of(player_username):
 
 def send_to(person):
     def send_to_person(receiver_bot, sender_bot, chat_id, msg, message_text, content_type):
-        global game_started
-        if not game_started:
-            return GAME_NOT_STARTED
         try:
             person_data = (get_angel_of if person == ANGEL else get_mortal_of)(
                 msg['from']['username'])
         except IndexError:
-            print(f'Invalid username {msg["from"]["username"]}')
-            return build_unauthorised_player_message(msg['from']['username'])
+            receiver_bot.sendMessage(chat_id, build_unauthorised_player_message(msg['from']['username']))
+            return f'Invalid username {msg["from"]["username"]}'
+
+        global game_started
+        if not game_started:
+            receiver_bot.sendMessage(chat_id, GAME_NOT_STARTED)
+            sender_data = groups[list(zip(
+                *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
+            if sender_data.chat_id is None:
+                receiver_bot.sendMessage(chat_id, 'It seems like you have not registered. Send /register and follow the instructions!')
+            return f'{sender_data.name} tried to send message before game started'
         if content_type == "sticker":
             sender_bot.sendSticker(person_data.chat_id, msg['sticker']['file_id'])
         elif content_type == "text":
