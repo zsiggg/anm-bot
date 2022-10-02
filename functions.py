@@ -8,13 +8,17 @@ from constants import *
 
 
 class Player():
-    def __init__(self, name, username, year, room, diet_pref, chat_id):
-        self.chat_id = chat_id     # this will be set later on with update_chat_id?
+    def __init__(self, name, username, diet_pref, favourites, note_for_angel, fun_fact, open_to_pranks):
+        self.number_of_starts = 0   # this will be incremented for every /start command run
+        self.chat_id = None     # this will be set later on with update_chat_id
         self.name = name
         self.username = username
-        self.year = year
-        self.room = room
-        self.diet_pref = diet_pref if diet_pref else 'None'
+        self.diet_pref = diet_pref
+        self.favourites = favourites
+        self.note_for_angel = note_for_angel
+        self.fun_fact = fun_fact
+        self.open_to_pranks = open_to_pranks
+
 
     def update_chat_id(self, chat_id):
         self.chat_id = chat_id
@@ -24,46 +28,46 @@ class Player():
 
 
 # FOR TESTING
-groups = np.array([[Player('Zsigmond', 'zsiggg', 'M', 'test', 'N', "259329943"), Player(
-    'Zsigmond', 'zsiggg', 'M', 'test gift', 'N', "259329943"), ], ])
+# groups = np.array([[Player('Zsigmond', 'zsiggg', 'M', 'test', 'N', <chat_id>), Player(
+#     'Zsigmond', 'zsiggg', 'M', 'test gift', 'N', <chat_id>), ], ])
 
 # FOR REAL USE
-# with open('players.pickle', 'rb') as f:
-#     groups = pickle.load(f)
+with open('players.pickle', 'rb') as f:
+    groups = pickle.load(f)
 
 with open('game_started.txt', 'r') as f:
     game_started = int(f.read())
 # game_started = False
 
 
-def update_players_database():      # writes groups into a pickle; called before the program terminates
+def update_players_database():      # writes groups into a pickle; called upon new data given
     global groups
     with open('players.pickle', 'wb') as f:
         pickle.dump(groups, f)
 
 
-def announce(bot, chat_id, msg, message_text):      # sends a custom message all players
+def announce(receiver_bot, sender_bot, chat_id, msg, message_text):      # sends a custom message all players
     message_text_split = message_text.split(maxsplit=1)
     if PASSWORD != message_text_split[0]:
         return 'Unauthorized.'
     for group in groups:
         for player in group:
-            bot.sendMessage(
+            receiver_bot.sendMessage(
                 player.chat_id, f'Hi {player.name}, House Comm has made a new ANNOUNCEMENT, see below:\n\n{message_text_split[1]}')
     return 'Your announcement has been broadcasted to everyone!'
 
 
 # sends a message to all players revealing their own group numbers
-def reveal(bot, chat_id, msg, message_text):
+def reveal(receiver_bot, sender_bot, chat_id, msg, message_text):
     if PASSWORD not in message_text:
         return 'Unauthorized.'
     for group_index, group in enumerate(groups):
         for player in group:
-            bot.sendMessage(player.chat_id, f'<b>✨THE BIG REVEAL✨</b>\n\nHi {player.name}, thank you for participating in Rusa Angels and Mortals! As we bring this event to a close, we invite you to come to THE LAWN from 8-10pm TONIGHT 🎉\n\nAre you excited to find out who your angel is? Hint - you may find this group number helpful: <code>{group_index + 1}</code>\n\nSee you guys there! 👀💓', parse_mode='HTML')
+            receiver_bot.sendMessage(player.chat_id, f'<b>✨THE BIG REVEAL✨</b>\n\nHi {player.name}, thank you for participating in Rusa Angels and Mortals! As we bring this event to a close, we invite you to come to THE LAWN from 8-10pm TONIGHT 🎉\n\nAre you excited to find out who your angel is? Hint - you may find this group number helpful: <code>{group_index + 1}</code>\n\nSee you guys there! 👀💓', parse_mode='HTML')
     return 'Pairings revealed!'
 
 
-def check_registration(bot, chat_id, msg, message_text):
+def check_registration(receiver_bot, sender_bot, chat_id, msg, message_text):
     if PASSWORD not in message_text:
         return 'Unauthorized.'
     remaining = np.where(np.vectorize(lambda x: x.chat_id,
@@ -77,7 +81,7 @@ def check_registration(bot, chat_id, msg, message_text):
     return f'All {groups.size} people has registered with the bot. Safe to start game.'
 
 
-def reload_players_data(bot, chat_id, msg, message_text):
+def reload_players_data(receiver_bot, sender_bot, chat_id, msg, message_text):
     global groups
     if PASSWORD not in message_text:
         return 'Unauthorized.'
@@ -114,9 +118,9 @@ def send_to(person):
             print(f'Invalid username {msg["from"]["username"]}')
             return build_unauthorised_player_message(msg['from']['username'])
         if content_type == "sticker":
-            receiver_bot.sendSticker(chat_id, msg['sticker']['file_id'])
+            sender_bot.sendSticker(person_data.chat_id, msg['sticker']['file_id'])
         elif content_type == "text":
-            receiver_bot.sendMessage(person_data.chat_id, message_text)
+            sender_bot.sendMessage(person_data.chat_id, message_text)
         # elif content_type == "photo":
         #     bot.sendPhoto(person_data.chat_id,
         #                   msg['photo'][0]['file_id'], caption=message_text)
@@ -132,8 +136,8 @@ def send_to(person):
         # elif content_type == "video_note":
         #     bot.sendVideoNote(person_data.chat_id,
         #                       msg['video_note']['file_id'])
-        else:       # unsupported file type, send error message to sender
-            sender_bot.sendMessage(person_data.chat_id, build_invalid_content_type_message(
+        else:       # unsupported file type, send error message from receiving bot
+            receiver_bot.sendMessage(chat_id, build_invalid_content_type_message(
                 content_type), reply_to_message_id=msg['message_id'])
             return f'Attempt to send unsupported content type ({content_type}) to {person}, {person_data.name}'
         return f'{content_type} sent to {person}, {person_data.name}'
@@ -142,57 +146,75 @@ def send_to(person):
 ############################### END SECTION: SEND TO PEOPLE ###############################
 
 
-def help_me(bot, chat_id, msg, message_text):
-    bot.sendMessage(chat_id, HELP_GUIDE, parse_mode='MarkdownV2')
+def help_me(receiver_bot, sender_bot, chat_id, msg, message_text):
+    receiver_bot.sendMessage(chat_id, HELP_GUIDE, parse_mode='MarkdownV2')
 
 
-def start(bot, chat_id, msg, message_text):
-    bot.sendMessage(chat_id, START_GUIDE)
-    bot.sendMessage(chat_id, HELP_GUIDE, parse_mode='MarkdownV2')
-    return 'Please proceed to verify your information below by typing "/register".'
+def start(receiver_bot, sender_bot, chat_id, msg, message_text):
+    receiver_bot.sendMessage(chat_id, START_GUIDE)
+    receiver_bot.sendMessage(chat_id, HELP_GUIDE, parse_mode='MarkdownV2')
+
+    try:
+        player_data = groups[list(zip(
+            *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
+    except:
+        return PLAYER_NOT_FOUND
+    else:
+        player_data.number_of_starts += 1   # possible bug if player sends /start to the same bot twice
+        update_players_database()
+        return f'Welcome {player_data.name}! Please proceed to send /start to the other bot ({os.environ.get("ANGEL_BOT_USERNAME")}, {os.environ.get("MORTAL_BOT_USERNAME")}) if you have not done so, then send /register to confirm your registration.'
 
 
-def start_game(bot, chat_id, msg, message_text):
+def start_game(receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text):
     global game_started
     if PASSWORD not in message_text:
         return 'Unauthorized.'
     print('Starting game...')
     for group in groups:
         for index, player in enumerate(group):
-            bot.sendMessage(player.chat_id, GAME_STARTING)
+            receiver_bot.sendMessage(player.chat_id, GAME_STARTING)
             if index == GROUP_SIZE - 1:
                 their_mortal = group[0]
             else:
                 their_mortal = group[index+1]
-            to_send = build_mortal_reveal_message(player.name, their_mortal)
-            bot.sendMessage(player.chat_id, to_send)
+            mortal_reveal_message = build_mortal_reveal_message(player.name, their_mortal)
+            mortal_bot.sendMessage(player.chat_id, mortal_reveal_message)
+            angel_bot.sendMessage(player.chat_id, START_GAME_MESSAGE_ANGEL_BOT)
     game_started = True
     with open('game_started.txt', 'w') as f:
         f.write('1')
 
 
-def register(bot, chat_id, msg, message_text):      # to be understood
+def register(receiver_bot, sender_bot, chat_id, msg, message_text):      # to be understood
     try:
         player_data = groups[list(zip(
             *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
-        bot.sendMessage(chat_id, build_registration_message(
-            player_data), parse_mode='HTML')
     except IndexError:
         return PLAYER_NOT_FOUND
+    
+    if player_data.number_of_starts >= 2:        # player has already sent /start to other bot
+        receiver_bot.sendMessage(chat_id, build_registration_message(
+            player_data), parse_mode='HTML')
+    else:                                           # first time that player is sending /start to any of the 2 bots
+        return (build_start_other_bot_message(player_data.name))
 
 
-def verify(bot, chat_id, msg, message_text):        # to be understood
-    player_data = groups[list(zip(
+
+def verify(receiver_bot, sender_bot, chat_id, msg, message_text):        # to be understood
+    player_data: Player = groups[list(zip(
         *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
-    player_data.update_chat_id(chat_id)
-    update_players_database()
-    print(
-        f'Player {player_data.name} (username {player_data.username}) sucessfully registered!')
-    print(check_registration(None, None, None, PASSWORD))
-    return (build_verification_message(player_data.name))
+    if player_data.number_of_starts >= 2:        # player has already sent /start to other bot
+        player_data.update_chat_id(chat_id)
+        update_players_database()
+        print(
+            f'Player {player_data.name} (username {player_data.username}) sucessfully registered!')
+        print(check_registration(None, None, None, None, PASSWORD))
+        return (build_verification_message(player_data.name))
+    else:                                           # first time that player is sending /start to any of the 2 bots
+        print(f'Player {player_data.name} (username {player_data.username}) registering without starting second bot')
+        return (build_start_other_bot_message(player_data.name))
 
-
-def update_username(bot, chat_id, msg, message_text):       # to be understood
+def update_username(receiver_bot, sender_bot, chat_id, msg, message_text):       # to be understood
     player_data = groups[list(
         zip(*np.where(np.vectorize(lambda x: x.chat_id)(groups) == chat_id)))[0]]
     # print(player_data.chat_id)

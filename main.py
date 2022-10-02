@@ -14,8 +14,11 @@ angel_bot = telepot.Bot(
 mortal_bot = telepot.Bot(
     os.environ.get('MORTAL_BOT_TOKEN'))
 
-
-def on_chat(msg, bot, receiver_bot, receiver):
+# receiver_bot = bot that receives message from user
+# sender_bot = bot that sends the received message; always different from receiver_bot
+# receiver = user that receives the message from sender_bot; either angel or mortal
+def on_chat(msg, receiver_bot, sender_bot, receiver):
+    print(msg)
     content_type, chat_type, chat_id = telepot.glance(msg)
     # now = time.strftime('%A, %Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     now = strftime('%Y-%m-%d %H:%M:%S', localtime(time()))
@@ -26,6 +29,9 @@ def on_chat(msg, bot, receiver_bot, receiver):
         command = message.split()[0]
         message_text = message[(len(command)+1):]
         # command, message_text = message.split(maxsplit=1) # doesn't work when message == command only
+        
+        # args for start: receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text
+        # args for other commands: receiver_bot, sender_bot, chat_id, msg, message_text
         command_handler = {
             '/register': register,
             '/verify': verify,
@@ -42,18 +48,25 @@ def on_chat(msg, bot, receiver_bot, receiver):
         # try:
         func = command_handler.get(command, None)
         if func is not None:        # check if message invokes a commnad
-            response = func(bot, chat_id, msg, message_text)
+            response = ''
+            if command == '/startgame' and receiver == ANGEL:   # then receiver_bot == angel_bot, sender_bot == mortal_bot
+                response = func(receiver_bot, sender_bot, receiver_bot, chat_id, msg, message_text)
+            elif command == '/startgame' and receiver == MORTAL:    # then receiver_bot == mortal_bot, sender_bot == angel_bot
+                response = func(receiver_bot, receiver_bot, sender_bot, chat_id, msg, message_text)
+            else:
+                response = func(receiver_bot, sender_bot, chat_id, msg, message_text)
+            
             if response:
-                bot.sendMessage(chat_id, response,
+                receiver_bot.sendMessage(chat_id, response,
                                 reply_to_message_id=msg['message_id'])
         else:                       # message is just plain text to be sent to the other bot
             response = send_to(receiver)(
-                receiver_bot, bot, chat_id, msg, message, content_type)
+                receiver_bot, sender_bot, chat_id, msg, message, content_type)
             print(response)
     else:
         message = msg.get('caption', "")
         response = send_to(receiver)(
-            receiver_bot, bot, chat_id, msg, message, content_type)
+            receiver_bot, sender_bot, chat_id, msg, message, content_type)
         print(response)
     # elif content_type == 'photo':
     #     message = msg.get('caption', "")
@@ -72,9 +85,9 @@ def on_chat(msg, bot, receiver_bot, receiver):
 
 
 angel_bot.message_loop({'chat': lambda msg: on_chat(
-    msg, angel_bot, mortal_bot, MORTAL)})
+    msg, angel_bot, mortal_bot, ANGEL)})
 mortal_bot.message_loop({'chat': lambda msg: on_chat(
-    msg, mortal_bot, angel_bot, ANGEL)})
+    msg, mortal_bot, angel_bot, MORTAL)})
 
 while True:
     sleep(10)

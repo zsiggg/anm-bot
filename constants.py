@@ -1,10 +1,12 @@
+from functions import Player
+
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
 ### USED IN functions.py ###
 
-GROUP_SIZE = 2  # EDIT THIS
+GROUP_SIZE = 5  # EDIT THIS
 PASSWORD = os.environ.get('PASSWORD')
 
 ANGEL = "🕊ANGEL🕊"
@@ -16,26 +18,29 @@ GAME_STARTING = 'Looking for your mortal...'
 
 PLAYER_NOT_FOUND = 'Player not found. Either fill up the Google Form, or contact house comm members for assistance.'
 
-START_GUIDE = '''HOOTHOOT‼️‼️ Welcome to Strix’s 🕊 Angel and 🐵 Mortal!! This bot 🤖🤖 is created and designed by @richard_dominick. He is an incredible fellow, please thank him if you do see him around!
+START_GUIDE = '''HOOTHOOT\\!\\! Welcome to Rusa's 🕊 Angel and 🐵 Mortal\\!\\! This bot 🤖🤖 is created and designed by @richard_dominick\\. He is an incredible fellow, please thank him if you do see him around\\!
 
-A reminder that you’re 🚫NOT🚫 allowed to enter anybody’s room at all times! Gifting is to be done ❌WITHOUT❌ risk of spreading infectious diseases and with minimal contact😷🤒!! And keep in mind OHS regulations regarding damage to property and COVID 1️⃣9️⃣!!! 
+A reminder that you’re 🚫NOT🚫 allowed to enter anybody’s room at all times\\! Gifting is to be done ❌WITHOUT❌ risk of spreading infectious diseases and with minimal contact😷🤒\\!\\! And keep in mind OHS regulations regarding damage to property and COVID 1️⃣9️⃣\\!\\!\\! 
 
-HAVE FUN AND STAY SAFE!!'''
+HAVE FUN AND STAY SAFE\\!\\!'''
 
 HELP_GUIDE = '''*Rusa Angels and Mortals Bot Help Guide*
 
 Rusa Angel and Mortals are back for another year 💪💪 
 
-Now, there are separate bots to talk to your Angel and Mortal. Talk to your Angel 👼🏻 in the Angel bot, and your Mortal 👶🏻 in the Mortal bot!
+Now, there are separate bots to talk to your Angel and Mortal\\. Talk to your Angel 👼🏻 in the Angel bot, and your Mortal 👶🏻 in the Mortal bot\\! Simply start sending a message or sticker ✨, and your angel or mortal should receive it\\!
 
 *Commands*
 `/help      `: brings up this page
 `/register  `: begins the registration process
 
-You can also send stickers ✨ using this bot, in addition to text messages\\.
+*What does not work*
+Tele Bubbles, videos, photos, or any kinds of media or files
+Replying messages, reactions to messages \\(your angel/mortal won't be able to see this even if you can\\!\\)
 
 If the bot does not acknowledge your message, please give it some time as the server may be experiencing high traffic/demand 🙁\\. For tech support please contact house comm members\\.
 '''
+START_GAME_MESSAGE_ANGEL_BOT = 'Your chat with your angel has started! Say hi 👋'
 
 
 def build_unauthorised_player_message(player_name):
@@ -50,19 +55,19 @@ def build_message(type, player_name, content, person):
         return f'✍️ Hi {player_name}, your {person} sent you a photo with the following caption:\n\n"{content}"' + end
 
 
-def build_mortal_reveal_message(player_name, their_mortal):
-    return f'Hi {player_name}, we have found your mortal, {their_mortal.name}!\n\nThey are staying at B{their_mortal.room}.\n\nPlease do note that they have the following dietary preferences: {their_mortal.diet_pref}\n\nRemember to message your mortal anonymously by sending /m or /mortal, followed by your message (e.g. "/m hi!"). Likewise, should you want to message your angel, type /a or /angel, followed by your message.'
+def build_mortal_reveal_message(player_name, their_mortal: Player):
+    return f'Hi {player_name}, we have found your mortal, {their_mortal.name}! These are their details:\n\nFun Fact: {their_mortal.fun_fact}\nFavourites: {their_mortal.favourites}\nComfortable with pranks?: {their_mortal.open_to_pranks}\nDieterary preferences:{their_mortal.diet_pref}\nNotes for Angel: {their_mortal.note_for_angel}\n\nHappy texting!'
 
 
-def build_registration_message(player_data):
-    return f'Please verify the following information:\n\n<b>Name:</b> {player_data.name}\n<b>Year:</b> {player_data.year}\n<b>Room:</b> {player_data.room}\n<b>Dietary Preferences:</b> {player_data.diet_pref}\n\nReply with /verify to verify.'
+def build_registration_message(player_data: Player):
+    return f'Please verify the following information:\n\n<b>Name:</b> {player_data.name}\n<b>Fun Fact: {player_data.fun_fact}\nFavourites: {player_data.favourites}\nComfortable with pranks?: {player_data.open_to_pranks}\nDieterary preferences:{player_data.diet_pref}\nNotes for Angel: {player_data.note_for_angel}\n\n\nReply with /verify to verify.'
 
 
 def build_verification_message(player_name):
     return f'Hi {player_name}, you have been successfully registered! Please wait for everyone else to finish their registration process. Once it is completed, the game will automatically start, and 🤖 I\'ll let you know who your {MORTAL} is!'
 
 
-def build_changed_username_message(player_data):
+def build_changed_username_message(player_data: Player):
     return f'Hi {player_data.name}, you have successfully updated your username to {player_data.username}!'
 
 
@@ -72,3 +77,7 @@ def build_unauthorized_username_error(new_username, actual_username):
 
 def build_invalid_content_type_message(content_type):
     return f'This content type ({content_type}) is not supported!'
+
+
+def build_start_other_bot_message(player_name):
+    return f'Hi {player_name}, you have not started the other bot. Please go to either {os.environ.get("ANGEL_BOT_USERNAME")} or {os.environ.get("MORTAL_BOT_USERNAME")} and send /start before sending /register and /verify!'
