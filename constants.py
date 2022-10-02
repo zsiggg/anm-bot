@@ -1,5 +1,3 @@
-from functions import Player
-
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -55,11 +53,11 @@ def build_message(type, player_name, content, person):
         return f'✍️ Hi {player_name}, your {person} sent you a photo with the following caption:\n\n"{content}"' + end
 
 
-def build_mortal_reveal_message(player_name, their_mortal: Player):
+def build_mortal_reveal_message(player_name, their_mortal):
     return f'Hi {player_name}, we have found your mortal, {their_mortal.name}! These are their details:\n\nFun Fact: {their_mortal.fun_fact}\nFavourites: {their_mortal.favourites}\nComfortable with pranks?: {their_mortal.open_to_pranks}\nDieterary preferences:{their_mortal.diet_pref}\nNotes for Angel: {their_mortal.note_for_angel}\n\nHappy texting!'
 
 
-def build_registration_message(player_data: Player):
+def build_registration_message(player_data):
     return f'Please verify the following information:\n\n<b>Name:</b> {player_data.name}\n<b>Fun Fact: {player_data.fun_fact}\nFavourites: {player_data.favourites}\nComfortable with pranks?: {player_data.open_to_pranks}\nDieterary preferences:{player_data.diet_pref}\nNotes for Angel: {player_data.note_for_angel}\n\n\nReply with /verify to verify.'
 
 
@@ -67,7 +65,7 @@ def build_verification_message(player_name):
     return f'Hi {player_name}, you have been successfully registered! Please wait for everyone else to finish their registration process. Once it is completed, the game will automatically start, and 🤖 I\'ll let you know who your {MORTAL} is!'
 
 
-def build_changed_username_message(player_data: Player):
+def build_changed_username_message(player_data):
     return f'Hi {player_data.name}, you have successfully updated your username to {player_data.username}!'
 
 
