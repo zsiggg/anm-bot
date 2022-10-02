@@ -35,9 +35,13 @@ class Player():
 with open('players.pickle', 'rb') as f:
     groups = pickle.load(f)
 
-with open('game_started.txt', 'r') as f:
-    game_started = int(f.read())
-# game_started = False
+game_started = False
+if os.path.exists('game_started.txt'):
+    with open('game_started.txt', 'r') as f:        # read previous game_started
+        game_started = int(f.read())
+else:
+    with open('game_started.txt', 'w') as f:        # create game_started.txt if not created
+        f.write('0')
 
 
 def update_players_database():      # writes groups into a pickle; called upon new data given
@@ -93,6 +97,12 @@ def reload_players_data(receiver_bot, sender_bot, chat_id, msg, message_text):
                         for i in range(GROUP_SIZE)]]
     groups = np.array(groups)
     update_players_database()
+
+    global game_started
+    game_started = False
+    with open('game_started.txt', 'w') as f:
+        f.write('0')
+
     return f'Players data successfully reloaded! {len(groups)} groups of {GROUP_SIZE} found.'
 
 
