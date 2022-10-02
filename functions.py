@@ -86,10 +86,10 @@ def reload_players_data(receiver_bot, sender_bot, chat_id, msg, message_text):
     if PASSWORD not in message_text:
         return 'Unauthorized.'
     groups = []
-    with open('players.csv', 'r') as f:
+    with open('players.csv', 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
         for row in reader:
-            groups += [[Player(*(row[5*i:5*(i+1)]))
+            groups += [[Player(*(row[7*i:7*(i+1)]))
                         for i in range(GROUP_SIZE)]]
     groups = np.array(groups)
     update_players_database()
@@ -162,7 +162,7 @@ def start(receiver_bot, sender_bot, chat_id, msg, message_text):
     else:
         player_data.number_of_starts += 1   # possible bug if player sends /start to the same bot twice
         update_players_database()
-        return f'Welcome {player_data.name}! Please proceed to send /start to the other bot ({os.environ.get("ANGEL_BOT_USERNAME")}, {os.environ.get("MORTAL_BOT_USERNAME")}) if you have not done so, then send /register to confirm your registration.'
+        return f'Welcome {player_data.name}! Please proceed to send /start to the other bot ({os.environ.get("ANGEL_BOT_USERNAME")}, {os.environ.get("MORTAL_BOT_USERNAME")}) if you have not done so, then send /register to any of the 2 bots to confirm your registration.'
 
 
 def start_game(receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text):
@@ -172,7 +172,8 @@ def start_game(receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text):
     print('Starting game...')
     for group in groups:
         for index, player in enumerate(group):
-            receiver_bot.sendMessage(player.chat_id, GAME_STARTING)
+            mortal_bot.sendMessage(player.chat_id, GAME_STARTING_MORTAL_BOT)
+            angel_bot.sendMessage(player.chat_id, GAME_STARTING_ANGEL_BOT)
             if index == GROUP_SIZE - 1:
                 their_mortal = group[0]
             else:

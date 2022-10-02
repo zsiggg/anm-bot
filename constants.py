@@ -4,7 +4,7 @@ load_dotenv()
 
 ### USED IN functions.py ###
 
-GROUP_SIZE = 5  # EDIT THIS
+GROUP_SIZE = 8  # EDIT THIS
 PASSWORD = os.environ.get('PASSWORD')
 
 ANGEL = "🕊ANGEL🕊"
@@ -12,7 +12,9 @@ MORTAL = "🐵MORTAL🐵"
 
 GAME_NOT_STARTED = 'The game has not started yet, please be patient ⏰⏳!'
 
-GAME_STARTING = 'Looking for your mortal...'
+GAME_STARTING_ANGEL_BOT = 'Looking for your angel...'
+
+GAME_STARTING_MORTAL_BOT = 'Looking for your mortal...'
 
 PLAYER_NOT_FOUND = 'Player not found. Either fill up the Google Form, or contact house comm members for assistance.'
 
@@ -58,7 +60,7 @@ def build_mortal_reveal_message(player_name, their_mortal):
 
 
 def build_registration_message(player_data):
-    return f'Please verify the following information:\n\n<b>Name:</b> {player_data.name}\n<b>Fun Fact: {player_data.fun_fact}\nFavourites: {player_data.favourites}\nComfortable with pranks?: {player_data.open_to_pranks}\nDieterary preferences:{player_data.diet_pref}\nNotes for Angel: {player_data.note_for_angel}\n\n\nReply with /verify to verify.'
+    return f'Please verify the following information:\n\n<b>Name:</b> {player_data.name}\n<b>Fun Fact:</b> {player_data.fun_fact}\n<b>Favourites:</b> {player_data.favourites}\n<b>Comfortable with pranks?:</b> {player_data.open_to_pranks}\n<b>Dieterary preferences:</b>{player_data.diet_pref}\n<b>Notes for Angel:</b> {player_data.note_for_angel}\n\n\nReply with /verify to verify.'
 
 
 def build_verification_message(player_name):
