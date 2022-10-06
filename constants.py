@@ -18,11 +18,11 @@ GAME_STARTING_MORTAL_BOT = 'Looking for your mortal...'
 
 PLAYER_NOT_FOUND = 'Player not found. Either fill up the Google Form, or contact house comm members for assistance.'
 
-START_GUIDE = '''HOOTHOOT\\!\\! Welcome to Rusa's 🕊 Angel and 🐵 Mortal\\!\\! This bot 🤖🤖 is created and designed by @richard_dominick\\. He is an incredible fellow, please thank him if you do see him around\\!
+START_GUIDE = '''HOOTHOOT!! Welcome to Rusa's 🕊 Angel and 🐵 Mortal!! This bot 🤖🤖 is created and designed by @zsiggg. He is an incredible fellow, please thank him if you do see him around!
 
-A reminder that you’re 🚫NOT🚫 allowed to enter anybody’s room at all times\\! Gifting is to be done ❌WITHOUT❌ risk of spreading infectious diseases and with minimal contact😷🤒\\!\\! And keep in mind OHS regulations regarding damage to property and COVID 1️⃣9️⃣\\!\\!\\! 
+A reminder that you’re 🚫NOT🚫 allowed to enter anybody’s room at all times! And keep in mind OHS regulations regarding damage to property!!! 
 
-HAVE FUN AND STAY SAFE\\!\\!'''
+HAVE FUN AND STAY SAFE!!'''
 
 HELP_GUIDE = '''*Rusa Angels and Mortals Bot Help Guide*
 
@@ -56,7 +56,7 @@ def build_message(type, player_name, content, person):
 
 
 def build_mortal_reveal_message(player_name, their_mortal):
-    return f'Hi {player_name}, we have found your mortal, {their_mortal.name}! These are their details:\n\nFun Fact: {their_mortal.fun_fact}\nFavourites: {their_mortal.favourites}\nComfortable with pranks?: {their_mortal.open_to_pranks}\nDieterary preferences:{their_mortal.diet_pref}\nNotes for Angel: {their_mortal.note_for_angel}\n\nHappy texting!'
+    return f'Hi {player_name}, we have found your mortal, {their_mortal.name}! These are their details:\n\n<b>Fun Fact:</b> {their_mortal.fun_fact}\n<b>Favourites:</b> {their_mortal.favourites}\n<b>Comfortable with pranks?:</b> {their_mortal.open_to_pranks}\n<b>Dieterary preferences: </b>{their_mortal.diet_pref}\n<b>Notes for Angel:</b> {their_mortal.note_for_angel}\n\nHappy texting!'
 
 
 def build_registration_message(player_data):
@@ -68,7 +68,7 @@ def build_verification_message(player_name):
 
 
 def build_changed_username_message(player_data):
-    return f'Hi {player_data.name}, you have successfully updated your username to {player_data.username}!'
+    return f'Updated {player_data.name} username to {player_data.username}!'
 
 
 def build_unauthorized_username_error(new_username, actual_username):

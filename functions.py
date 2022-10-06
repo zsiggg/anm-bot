@@ -6,11 +6,20 @@ import numpy as np
 
 from constants import *
 
+def migrate(obj):
+    newobj = obj.copy()
+    val = newobj.pop('number_of_starts') >= 2
+    newobj['started_in_angel_bot'] = val
+    newobj['started_in_mortal_bot'] = val
+    return newobj
+
+
 
 class Player():
-    def __init__(self, name, username, diet_pref, favourites, note_for_angel, fun_fact, open_to_pranks):
-        self.number_of_starts = 0   # this will be incremented for every /start command run
-        self.chat_id = None     # this will be set later on with update_chat_id
+    def __init__(self, name, username, diet_pref, favourites, note_for_angel, fun_fact, open_to_pranks, chat_id = None, started_in_angel_bot = False, started_in_mortal_bot = False):
+        self.started_in_angel_bot = started_in_angel_bot   # True if /start command run in angel bot
+        self.started_in_mortal_bot = started_in_mortal_bot   # True if /start command run in mortal bot
+        self.chat_id = chat_id     # this will be set later on with update_chat_id
         self.name = name
         self.username = username
         self.diet_pref = diet_pref
@@ -166,7 +175,7 @@ def help_me(receiver_bot, sender_bot, chat_id, msg, message_text):
     receiver_bot.sendMessage(chat_id, HELP_GUIDE, parse_mode='MarkdownV2')
 
 
-def start(receiver_bot, sender_bot, chat_id, msg, message_text):
+def start(receiver_bot, sender_bot, chat_id, msg, message_text, receiver):
     receiver_bot.sendMessage(chat_id, START_GUIDE)
     receiver_bot.sendMessage(chat_id, HELP_GUIDE, parse_mode='MarkdownV2')
 
@@ -176,7 +185,10 @@ def start(receiver_bot, sender_bot, chat_id, msg, message_text):
     except:
         return PLAYER_NOT_FOUND
     else:
-        player_data.number_of_starts += 1   # possible bug if player sends /start to the same bot twice
+        if receiver == ANGEL:
+            player_data.started_in_angel_bot = True
+        else:
+            player_data.started_in_mortal_bot = True
         update_players_database()
         return f'Welcome {player_data.name}! Please proceed to send /start to the other bot ({os.environ.get("ANGEL_BOT_USERNAME")}, {os.environ.get("MORTAL_BOT_USERNAME")}) if you have not done so, then send /register to any of the 2 bots to confirm your registration.'
 
@@ -195,7 +207,7 @@ def start_game(receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text):
             else:
                 their_mortal = group[index+1]
             mortal_reveal_message = build_mortal_reveal_message(player.name, their_mortal)
-            mortal_bot.sendMessage(player.chat_id, mortal_reveal_message)
+            mortal_bot.sendMessage(player.chat_id, mortal_reveal_message, parse_mode='HTML')
             angel_bot.sendMessage(player.chat_id, START_GAME_MESSAGE_ANGEL_BOT)
     game_started = True
     with open('game_started.txt', 'w') as f:
@@ -204,12 +216,12 @@ def start_game(receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text):
 
 def register(receiver_bot, sender_bot, chat_id, msg, message_text):      # to be understood
     try:
-        player_data = groups[list(zip(
+        player_data: Player = groups[list(zip(
             *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
     except IndexError:
         return PLAYER_NOT_FOUND
     
-    if player_data.number_of_starts >= 2:        # player has already sent /start to other bot
+    if player_data.started_in_angel_bot and player_data.started_in_mortal_bot:        # player sent start in both bots
         receiver_bot.sendMessage(chat_id, build_registration_message(
             player_data), parse_mode='HTML')
     else:                                           # first time that player is sending /start to any of the 2 bots
@@ -220,7 +232,7 @@ def register(receiver_bot, sender_bot, chat_id, msg, message_text):      # to be
 def verify(receiver_bot, sender_bot, chat_id, msg, message_text):        # to be understood
     player_data: Player = groups[list(zip(
         *np.where(np.vectorize(lambda x: x.username.strip())(groups) == msg['from']['username'])))[0]]
-    if player_data.number_of_starts >= 2:        # player has already sent /start to other bot
+    if player_data.started_in_angel_bot and player_data.started_in_mortal_bot:        # player sent start in both bots
         player_data.update_chat_id(chat_id)
         update_players_database()
         print(
@@ -231,17 +243,29 @@ def verify(receiver_bot, sender_bot, chat_id, msg, message_text):        # to be
         print(f'Player {player_data.name} (username {player_data.username}) registering without starting second bot')
         return (build_start_other_bot_message(player_data.name))
 
-def update_username(receiver_bot, sender_bot, chat_id, msg, message_text):       # to be understood
-    player_data = groups[list(
-        zip(*np.where(np.vectorize(lambda x: x.chat_id)(groups) == chat_id)))[0]]
-    # print(player_data.chat_id)
+# updates any field of a Player
+def update(receiver_bot, sender_bot, chat_id, msg, message_text):       # to be understood
+    [password, username, field_name, new_field_value] = message_text.split('|')
+    if password != PASSWORD:
+        return 'Unauthorised.'
     try:
-        assert (message_text == msg['from']['username'])
-    except AssertionError:
-        return build_unauthorized_username_error(message_text, msg['from']['username'])
-    player_data.update_username(message_text)
+        player_data = groups[list(
+            zip(*np.where(np.vectorize(lambda x: x.username)(groups) == username)))[0]]
+    except IndexError:
+        return PLAYER_NOT_FOUND
     # print(player_data.chat_id)
+    # try:
+    #     assert (message_text == msg['from']['username'])
+    # except AssertionError:
+    #     return build_unauthorized_username_error(message_text, msg['from']['username'])
+    try:
+        old_field_value = getattr(player_data, field_name)
+    except AttributeError:
+        return f'There is no such field as {field_name}'
+
+    setattr(player_data, field_name, new_field_value)
+    # print(player_data.chat_id)
+    # receiver_bot.sendMessage(chat_id, build_changed_username_message(player_data))
     update_players_database()
-    print(
-        f'Player {player_data.name} updated their username to {player_data.username}!')
-    return build_changed_username_message(player_data)
+    return (
+        f'Updated {field_name} of {player_data.name} from {old_field_value} to {getattr(player_data, field_name)}!')

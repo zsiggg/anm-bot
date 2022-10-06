@@ -18,7 +18,6 @@ mortal_bot = telepot.Bot(
 # sender_bot = bot that sends the received message; always different from receiver_bot
 # receiver = user that receives the message from sender_bot; either angel or mortal
 def on_chat(msg, receiver_bot, sender_bot, receiver):
-    print(msg)
     content_type, chat_type, chat_id = telepot.glance(msg)
     # now = time.strftime('%A, %Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     now = strftime('%Y-%m-%d %H:%M:%S', localtime(time()))
@@ -30,7 +29,8 @@ def on_chat(msg, receiver_bot, sender_bot, receiver):
         message_text = message[(len(command)+1):]
         # command, message_text = message.split(maxsplit=1) # doesn't work when message == command only
         
-        # args for start: receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text
+        # args for start: receiver_bot, sender_bot, chat_id, msg, message_text, receiver
+        # args for startgame: receiver_bot, mortal_bot, angel_bot, chat_id, msg, message_text
         # args for other commands: receiver_bot, sender_bot, chat_id, msg, message_text
         command_handler = {
             '/register': register,
@@ -40,7 +40,7 @@ def on_chat(msg, receiver_bot, sender_bot, receiver):
             '/reload': reload_players_data,
             '/start': start,
             '/help': help_me,
-            '/update': update_username,
+            '/update': update,
             '/reveal': reveal,
             '/announce': announce,
             # '/assign': assign_pairings,
@@ -53,6 +53,8 @@ def on_chat(msg, receiver_bot, sender_bot, receiver):
                 response = func(receiver_bot, sender_bot, receiver_bot, chat_id, msg, message_text)
             elif command == '/startgame' and receiver == MORTAL:    # then receiver_bot == mortal_bot, sender_bot == angel_bot
                 response = func(receiver_bot, receiver_bot, sender_bot, chat_id, msg, message_text)
+            elif command == '/start':
+                response = func(receiver_bot, sender_bot, chat_id, msg, message_text, receiver)
             else:
                 response = func(receiver_bot, sender_bot, chat_id, msg, message_text)
             
