@@ -3,6 +3,7 @@ import pickle
 from random import randint, shuffle
 
 import numpy as np
+import telepot
 
 from constants import *
 
@@ -37,8 +38,8 @@ class Player():
 
 
 # FOR TESTING
-# groups = np.array([[Player('Zsigmond', 'zsiggg', 'M', 'test', 'N', <chat_id>), Player(
-#     'Zsigmond', 'zsiggg', 'M', 'test gift', 'N', <chat_id>), ], ])
+# groups = np.array([[Player('Zsigmond', 'zsiggg', 'everything', 'for you to find out', 'none', 'im fun', 'true', <chat_id>, True, True), 
+#     Player('Zsigmond', 'zsiggg', 'everything', 'for you to find out', 'none', 'im fun', 'true', <chat_id>, True, True), ], ])
 
 # FOR REAL USE
 with open('players.pickle', 'rb') as f:
@@ -51,7 +52,6 @@ if os.path.exists('game_started.txt'):
 else:
     with open('game_started.txt', 'w') as f:        # create game_started.txt if not created
         f.write('0')
-
 
 def update_players_database():      # writes groups into a pickle; called upon new data given
     global groups
@@ -142,31 +142,83 @@ def send_to(person):
             if sender_data.chat_id is None:
                 receiver_bot.sendMessage(chat_id, 'It seems like you have not registered. Send /register and follow the instructions!')
             return f'{sender_data.name} tried to send message before game started'
-        if content_type == "sticker":
-            sender_bot.sendSticker(person_data.chat_id, msg['sticker']['file_id'])
-        elif content_type == "text":
-            sender_bot.sendMessage(person_data.chat_id, message_text)
-        # elif content_type == "photo":
-        #     bot.sendPhoto(person_data.chat_id,
-        #                   msg['photo'][0]['file_id'], caption=message_text)
-        # elif content_type == "audio":
-        #     bot.sendAudio(person_data.chat_id,
-        #                   msg['audio']['file_id'], caption=message_text)
-        # elif content_type == "video":
-        #     bot.sendVideo(person_data.chat_id,
-        #                   msg['video']['file_id'], caption=message_text)
-        # elif content_type == "voice":
-        #     bot.sendVoice(person_data.chat_id,
-        #                   msg['voice']['file_id'], caption=message_text)
-        # elif content_type == "video_note":
-        #     bot.sendVideoNote(person_data.chat_id,
-        #                       msg['video_note']['file_id'])
-        else:       # unsupported file type, send error message from receiving bot
-            receiver_bot.sendMessage(chat_id, build_invalid_content_type_message(
-                content_type), reply_to_message_id=msg['message_id'])
-            return f'Attempt to send unsupported content type ({content_type}) to {person}, {person_data.name}'
-        return f'{content_type} sent to {person}, {person_data.name}'
+
+        if content_type in ['sticker', 'text']:     # TO BE SENT TO USER DIRECTLY
+            if content_type == "sticker":
+                sender_bot.sendSticker(person_data.chat_id, msg['sticker']['file_id'])
+            elif content_type == "text":
+                sender_bot.sendMessage(person_data.chat_id, message_text)
+            return f'{content_type} sent to {person}, {person_data.name}'
+        else:                                       # FILES; TO BE FORWARDED TO FILES CHANNEL
+            if content_type in ['photo', 'audio', 'video', 'voice', 'video_note', 'document']:      # supported file types               
+                receiver_bot.forwardMessage(os.environ.get('FILES_CHANNEL_ID'), chat_id, msg['message_id'])
+                return f'Forwarded {content_type} from {person}, {person_data.name} to files channel'
+            else:                                                                       # unsupported file type, send error message from receiving bot
+                receiver_bot.sendMessage(chat_id, build_invalid_content_type_message(
+                    content_type), reply_to_message_id=msg['message_id'])
+                return f'Attempt to send unsupported content type ({content_type}) to {person}, {person_data.name}'
+            
     return send_to_person
+
+def send_file_from_channel(msg, receiver_bot, sender_bot, receiver):
+    # bot that received the original message forwards the message to channel
+    # receiver_bot here is the other bot that did not forward the message to the channel
+    # thus in the context of the original message sent from the user, receiver_bot and sender_bot roles should be swapped
+    temp = receiver_bot
+    receiver_bot = sender_bot
+    sender_bot = temp
+
+    channel_receiver_bot = sender_bot   # bot that received forwarded message is now the sender_bot
+
+    content_type, chat_type, chat_id = telepot.glance(msg)
+
+    if content_type in ['text', 'sticker']:
+        print('ERROR! Text and stickers should not be received from files channel')
+        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg)())
+        return
+
+    if msg.get('forward_from', None) == None:
+        print('ERROR! Files must be forwarded from somewhere to be successfully sent.')
+        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg)())
+        return
+    
+    if content_type not in ['photo', 'audio', 'video', 'voice', 'video_note', 'document']:
+        print('ERROR! Unsupported file type received in files channel.')
+        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg)())
+        return
+
+    try:
+        person_data = (get_angel_of if receiver == ANGEL else get_mortal_of)(
+            msg['forward_from']['username'])
+    except IndexError:
+        receiver_bot.sendMessage(chat_id, build_unauthorised_player_message(msg['forward_from']['username']))
+        return f'Invalid username {msg["forward_from"]["username"]}'
+
+    print(f'Sending {content_type} from {person_data.name} for {receiver} from files channel')
+
+    match content_type:
+        case 'photo':
+            sender_bot.sendPhoto(person_data.chat_id,
+                          msg['photo'][0]['file_id'], caption=msg.get('caption', ''))
+        case 'audio':
+            sender_bot.sendAudio(person_data.chat_id,
+                          msg['audio']['file_id'], caption=msg.get('caption', ''))
+        case 'video':
+            sender_bot.sendVideo(person_data.chat_id,
+                          msg['video']['file_id'], caption=msg.get('caption', ''))
+        case 'voice':
+            sender_bot.sendVoice(person_data.chat_id,
+                          msg['voice']['file_id'], caption=msg.get('caption', ''))
+        case 'video_note':
+            sender_bot.sendVideoNote(person_data.chat_id,
+                msg['video_note']['file_id'])
+        case 'document':
+            sender_bot.sendDocument(person_data.chat_id,
+                msg['document']['file_id'], caption=msg.get('caption', ''))
+        case _:
+            print(f'ERROR! No function is provided for valid file type {content_type}')
+    
+    channel_receiver_bot.deleteMessage(telepot.message_identifier(msg))
 
 ############################### END SECTION: SEND TO PEOPLE ###############################
 
