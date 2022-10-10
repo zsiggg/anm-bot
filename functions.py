@@ -152,7 +152,7 @@ def send_to(person):
         else:                                       # FILES; TO BE FORWARDED TO FILES CHANNEL
             if content_type in ['photo', 'audio', 'video', 'voice', 'video_note', 'document']:      # supported file types               
                 receiver_bot.forwardMessage(os.environ.get('FILES_CHANNEL_ID'), chat_id, msg['message_id'])
-                return f'Forwarded {content_type} from {person}, {person_data.name} to files channel'
+                return f'Forwarded {content_type} for {person}, {person_data.name} to files channel'
             else:                                                                       # unsupported file type, send error message from receiving bot
                 receiver_bot.sendMessage(chat_id, build_invalid_content_type_message(
                     content_type), reply_to_message_id=msg['message_id'])
@@ -167,6 +167,7 @@ def send_file_from_channel(msg, receiver_bot, sender_bot, receiver):
     temp = receiver_bot
     receiver_bot = sender_bot
     sender_bot = temp
+    receiver = ANGEL if receiver == MORTAL else MORTAL
 
     channel_receiver_bot = sender_bot   # bot that received forwarded message is now the sender_bot
 
@@ -174,17 +175,17 @@ def send_file_from_channel(msg, receiver_bot, sender_bot, receiver):
 
     if content_type in ['text', 'sticker']:
         print('ERROR! Text and stickers should not be received from files channel')
-        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg)())
+        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg))
         return
 
     if msg.get('forward_from', None) == None:
         print('ERROR! Files must be forwarded from somewhere to be successfully sent.')
-        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg)())
+        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg))
         return
     
     if content_type not in ['photo', 'audio', 'video', 'voice', 'video_note', 'document']:
         print('ERROR! Unsupported file type received in files channel.')
-        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg)())
+        channel_receiver_bot.deleteMessage(telepot.message_identifier(msg))
         return
 
     try:
@@ -194,7 +195,7 @@ def send_file_from_channel(msg, receiver_bot, sender_bot, receiver):
         receiver_bot.sendMessage(chat_id, build_unauthorised_player_message(msg['forward_from']['username']))
         return f'Invalid username {msg["forward_from"]["username"]}'
 
-    print(f'Sending {content_type} from {person_data.name} for {receiver} from files channel')
+    print(f'Sending {content_type} to {receiver}, {person_data.name} from files channel')
 
     match content_type:
         case 'photo':
