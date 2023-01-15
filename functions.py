@@ -212,28 +212,27 @@ def send_file_from_channel(msg, receiver_bot, sender_bot, receiver):
 
     print(f'Sending {content_type} to {receiver}, {person_data.name} from files channel')
 
-    match content_type:
-        case 'photo':
-            sender_bot.sendPhoto(person_data.chat_id,
-                          msg['photo'][0]['file_id'], caption=msg.get('caption', ''))
-        case 'audio':
-            sender_bot.sendAudio(person_data.chat_id,
-                          msg['audio']['file_id'], caption=msg.get('caption', ''))
-        case 'video':
-            sender_bot.sendVideo(person_data.chat_id,
-                          msg['video']['file_id'], caption=msg.get('caption', ''))
-        case 'voice':
-            sender_bot.sendVoice(person_data.chat_id,
-                          msg['voice']['file_id'], caption=msg.get('caption', ''))
-        case 'video_note':
-            sender_bot.sendVideoNote(person_data.chat_id,
-                msg['video_note']['file_id'])
-        case 'document':
-            sender_bot.sendDocument(person_data.chat_id,
-                msg['document']['file_id'], caption=msg.get('caption', ''))
-        case _:
-            print(f'ERROR! No function is provided for valid file type {content_type}')
-    
+    if content_type == 'photo':
+        sender_bot.sendPhoto(person_data.chat_id,
+            msg['photo'][0]['file_id'], caption=msg.get('caption', ''))
+    elif content_type == 'audio':
+        sender_bot.sendAudio(person_data.chat_id,
+            msg['audio']['file_id'], caption=msg.get('caption', ''))
+    elif content_type == 'video':
+        sender_bot.sendVideo(person_data.chat_id,
+            msg['video']['file_id'], caption=msg.get('caption', ''))
+    elif content_type == 'voice':
+        sender_bot.sendVoice(person_data.chat_id,
+            msg['voice']['file_id'], caption=msg.get('caption', ''))
+    elif content_type == 'video_note':
+        sender_bot.sendVideoNote(person_data.chat_id,
+            msg['video_note']['file_id'])
+    elif content_type == 'document':
+        sender_bot.sendDocument(person_data.chat_id,
+            msg['document']['file_id'], caption=msg.get('caption', ''))
+    else:
+        print(f'ERROR! No function is provided for valid file type {content_type}')
+
     channel_receiver_bot.deleteMessage(telepot.message_identifier(msg))
 ############################### END SECTION: SEND TO PEOPLE ###############################
 
