@@ -89,6 +89,9 @@ mortal_bot_webhook = OrderedWebhook(mortal_bot, {
 })
 
 app = Flask(__name__)
+@app.route('/', methods=['GET'])
+def for_testing():
+    return 'This app is working correctly!'
 
 @app.route('/angel', methods=['POST'])
 def process_angel_bot_received_messages():
