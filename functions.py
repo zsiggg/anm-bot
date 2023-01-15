@@ -29,7 +29,7 @@ class Player():
 
 # writes the global variable groups into a .pickle file; called when groups is changed
 def update_players_database():      
-    with open('players.pickle', 'wb') as f:
+    with open('tmp/players.pickle', 'wb') as f:
         pickle.dump(groups, f)
 
 
@@ -308,7 +308,7 @@ def update(receiver_bot, sender_bot, chat_id, msg, message_text):
 # MAIN CODE FOR REAL USE (comment out if testing)
 reload_players_data(None, None, None, None, PASSWORD)
 
-with open('players.pickle', 'rb') as f:
+with open('tmp/players.pickle', 'rb') as f:
     groups = pickle.load(f)
 
 game_started = False
