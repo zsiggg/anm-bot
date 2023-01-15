@@ -35,8 +35,8 @@ Now, there are separate bots to talk to your Angel and Mortal\\. Talk to your An
 `/register  `: begins the registration process
 
 *What does not work*
-Tele Bubbles, videos, photos, or any kinds of media or files
-Replying messages, reactions to messages \\(your angel/mortal won't be able to see this even if you can\\!\\)
+Sending of locations, contacts, games
+Replying/deleting messages, reactions to messages \\(your angel/mortal won't be able to see this even if you can\\!\\)
 
 If the bot does not acknowledge your message, please give it some time as the server may be experiencing high traffic/demand 🙁\\. For tech support please contact house comm members\\.
 '''
@@ -45,14 +45,6 @@ START_GAME_MESSAGE_ANGEL_BOT = 'Your chat with your angel has started! Say hi �
 
 def build_unauthorised_player_message(player_name):
     return f'ERROR: Unauthorised player!\n\nI\'m sorry, I don\'t recognise you.\n\nIf you are getting this error even though you have registered for the event, please contact tech support!'
-
-
-def build_message(type, player_name, content, person):
-    end = f'\n\nType {["/m", "/a"][person == ANGEL]} or {["/mortal", "/angel"][person == ANGEL]}, followed by your message, to reply.\nExample: "{["/m", "/a"][person == ANGEL]} hi!" {["#mortal", "#angel"][person == ANGEL]}'
-    if type == 'text':
-        return f'✍️ Hi {player_name}, your {person} sent you a message:\n\n"{content}"' + end
-    elif type == 'photo':
-        return f'✍️ Hi {player_name}, your {person} sent you a photo with the following caption:\n\n"{content}"' + end
 
 
 def build_mortal_reveal_message(player_name, their_mortal):
@@ -65,14 +57,6 @@ def build_registration_message(player_data):
 
 def build_verification_message(player_name):
     return f'Hi {player_name}, you have been successfully registered! Please wait for everyone else to finish their registration process. Once it is completed, the game will automatically start, and 🤖 I\'ll let you know who your {MORTAL} is!'
-
-
-def build_changed_username_message(player_data):
-    return f'Updated {player_data.name} username to {player_data.username}!'
-
-
-def build_unauthorized_username_error(new_username, actual_username):
-    return f'Error: Not allowed! You are trying to update your username to {new_username}, but your current username is {actual_username}!\n\nPlease only send "/update <replace_this_with_your_new_username>" AFTER you have updated your username.\ne.g. "/update {actual_username}"'
 
 
 def build_invalid_content_type_message(content_type):
