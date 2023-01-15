@@ -4,7 +4,7 @@ load_dotenv()
 
 ### USED IN functions.py ###
 
-GROUP_SIZE = 8  # EDIT THIS
+GROUP_SIZE = 2  # EDIT THIS
 PASSWORD = os.environ.get('PASSWORD')
 
 ANGEL = "🕊ANGEL🕊"

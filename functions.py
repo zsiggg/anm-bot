@@ -7,23 +7,6 @@ import telepot
 
 from constants import *
 
-# MAIN CODE FOR TESTING (comment out if in production)
-# groups = np.array([[Player('Zsigmond', 'zsiggg', 'everything', 'for you to find out', 'none', 'im fun', 'true', <chat_id>, True, True), 
-#     Player('Zsigmond', 'zsiggg', 'everything', 'for you to find out', 'none', 'im fun', 'true', <chat_id>, True, True), ], ])
-
-# MAIN CODE FOR REAL USE (comment out if testing)
-with open('players.pickle', 'rb') as f:
-    groups = pickle.load(f)
-
-game_started = False
-if os.path.exists('game_started.txt'):
-    with open('game_started.txt', 'r') as f:        # read previous game_started
-        game_started = int(f.read())
-else:
-    with open('game_started.txt', 'w') as f:        # create game_started.txt if not created
-        f.write('0')
-
-
 class Player():
     def __init__(self, name, username, diet_pref, favourites, note_for_angel, fun_fact, open_to_pranks, chat_id = None, started_in_angel_bot = False, started_in_mortal_bot = False):
         self.started_in_angel_bot = started_in_angel_bot   # True if /start command run in angel bot
@@ -315,3 +298,24 @@ def update(receiver_bot, sender_bot, chat_id, msg, message_text):
     update_players_database()
     return (
         f'Updated {field_name} of {player_data.name} from {old_field_value} to {getattr(player_data, field_name)}!')
+############################### SECTION: OTHER COMMANDS ###############################
+
+
+# MAIN CODE FOR TESTING (comment out if in production)
+# groups = np.array([[Player('Zsigmond', 'zsiggg', 'everything', 'for you to find out', 'none', 'im fun', 'true', <chat_id>, True, True), 
+#     Player('Zsigmond', 'zsiggg', 'everything', 'for you to find out', 'none', 'im fun', 'true', <chat_id>, True, True), ], ])
+
+# MAIN CODE FOR REAL USE (comment out if testing)
+reload_players_data(None, None, None, None, PASSWORD)
+
+with open('players.pickle', 'rb') as f:
+    groups = pickle.load(f)
+
+game_started = False
+if os.path.exists('game_started.txt'):
+    with open('game_started.txt', 'r') as f:        # read previous game_started
+        game_started = int(f.read())
+else:
+    with open('game_started.txt', 'w') as f:        # create game_started.txt if not created
+        f.write('0')
+
